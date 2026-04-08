@@ -1,0 +1,2 @@
+[gymnasium.envs]
+founder_endurance/FounderEndurance-v1 = founder_endurance.envs:FounderEnv
