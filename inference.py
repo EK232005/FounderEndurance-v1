@@ -155,12 +155,15 @@ async def main() -> None:
             if done:
                 # To assign success score based on survival or launch
                 if obs[3] > 0.8 and obs[5] > 0.0 and truncated and not terminated:
-                    score = 1.0 # Perfect launch
+                    score = 0.99 # Perfect launch
                 elif truncated and not terminated:
-                    score = 0.5 # Survived, but no launch
+                    score = 0.50 # Survived, but no launch
                 else:
-                    score = 0.0 # Failed
+                    score = 0.01 # Failed
                 break
+        
+        # Final safety clamp
+        score = max(0.01, min(0.99, score))
 
         success = score >= SUCCESS_SCORE_THRESHOLD
 

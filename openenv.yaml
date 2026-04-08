@@ -11,6 +11,11 @@ tasks:
     max_steps: 90
     reward_threshold: 400.0
 
+  - id: "founder_survival_medium"
+    description: "Survive 90 days as a startup founder in a moderate market."
+    max_steps: 90
+    reward_threshold: 350.0
+
   - id: "founder_survival_hard"
     description: "Survive 90 days as a startup founder in a highly volatile market."
     max_steps: 90
