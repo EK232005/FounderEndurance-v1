@@ -18,7 +18,10 @@ from openai import OpenAI
 API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY", "dummy-key")
 API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
-TASK_NAME = os.getenv("FOUNDER_TASK", "founder_survival")
+import sys
+# Find any env var ending in _TASK to catch whatever format OpenEnv passes, or fallback to argv
+task_env_val = next((val for key, val in os.environ.items() if key.endswith("_TASK")), None)
+TASK_NAME = os.getenv("TASK") or task_env_val or (sys.argv[1] if len(sys.argv) > 1 else "founder_survival_easy")
 BENCHMARK = os.getenv("FOUNDER_BENCHMARK", "FounderEndurance-v1")
 MAX_STEPS = 90
 TEMPERATURE = 0.7
