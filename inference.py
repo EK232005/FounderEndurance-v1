@@ -24,7 +24,7 @@ task_env_val = next((val for key, val in os.environ.items() if key.endswith("_TA
 TASK_NAME = os.getenv("TASK") or task_env_val or (sys.argv[1] if len(sys.argv) > 1 else "founder_survival_easy")
 BENCHMARK = os.getenv("FOUNDER_BENCHMARK", "FounderEndurance-v1")
 MAX_STEPS = 90
-TEMPERATURE = 0.7
+TEMPERATURE = 0.0 # Deterministic
 MAX_TOKENS = 150
 SUCCESS_SCORE_THRESHOLD = 0.5  # Need halfway good score for success
 
@@ -100,9 +100,10 @@ def get_model_message(client: OpenAI, step: int, obs: np.ndarray, last_reward: f
             stream=False,
         )
         text = (completion.choices[0].message.content or "").strip()
-        # Parse JSON
-        if text.startswith("```json"):
-            text = text[7:-3]
+        import re
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            text = match.group(0)
         action_dict = json.loads(text)
         return action_dict
     except Exception as exc:
@@ -127,7 +128,7 @@ async def main() -> None:
     log_start(task=TASK_NAME, env=BENCHMARK, model=MODEL_NAME)
 
     try:
-        obs, info = env.reset()
+        obs, info = env.reset(options={"task_id": TASK_NAME})
         last_reward = 0.0
 
         for step in range(1, MAX_STEPS + 1):

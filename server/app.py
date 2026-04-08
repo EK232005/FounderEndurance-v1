@@ -17,12 +17,19 @@ async def reset(request: Request):
         pass
     
     seed = body.get("seed", None)
-    obs, info = env.reset(seed=seed)
+    options = body.get("options", None)
+    
+    # In case options wasn't provided, safe fallback
+    obs, info = env.reset(seed=seed, options=options)
     return {"observation": obs.tolist(), "info": info}
 
 @app.post("/step")
 async def step(request: Request):
-    body = await request.json()
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
     action_list = body.get("action", [1, 0, 0]) # Default safe action
     action = np.array(action_list, dtype=int)
     

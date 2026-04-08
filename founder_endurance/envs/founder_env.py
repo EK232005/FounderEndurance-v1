@@ -40,18 +40,34 @@ class FounderEnv(gym.Env):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
 
+        task_id = (options or {}).get("task_id", "founder_survival_easy")
+        
+        # Difficulty defaults (Easy)
+        cash = 0.80
+        cortisol = 0.00
+        self.p_crisis_mult = 0.5
+        
+        if "medium" in task_id:
+            cash = 0.60
+            cortisol = 0.15
+            self.p_crisis_mult = 1.0
+        elif "hard" in task_id:
+            cash = 0.30
+            cortisol = 0.40
+            self.p_crisis_mult = 2.0
+
         self._day = 0
         self._consecutive_overwork = 0
         self._caffeine_clearance_days = 0
 
-        # Initial state -- founder is reasonably healthy at episode start
+        # Initial state -- adjusted by difficulty
         obs = np.array([
             0.10,  # sleep_debt
-            0.15,  # cortisol_level
+            cortisol,  # cortisol_level
             0.00,  # caffeine_toxicity
             0.50,  # product_velocity
             0.80,  # team_morale
-            0.60,  # cash_runway
+            cash,  # cash_runway
             0.50,  # market_condition (mid-cycle)
             0.00,  # active_crisis
             0.00,  # day_of_week (Monday)
@@ -223,7 +239,7 @@ class FounderEnv(gym.Env):
             obs[1] += 0.05  # active crisis raises cortisol each day
 
         # Stochastic crisis generation
-        p_crisis = 0.05 + (1.0 - obs[3]) * 0.15 + obs[2] * 0.10
+        p_crisis = (0.05 + (1.0 - obs[3]) * 0.15 + obs[2] * 0.10) * getattr(self, "p_crisis_mult", 1.0)
         if obs[7] == 0.0 and self.np_random.random() < p_crisis:
             obs[7] = 1.0  # new crisis activated
 
